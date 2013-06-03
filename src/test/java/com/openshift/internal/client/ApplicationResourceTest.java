@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.openshift.internal.client;
 
-import static com.openshift.client.utils.MockUtils.anyForm;
 import static com.openshift.client.utils.Samples.GET_DOMAINS;
 import static com.openshift.client.utils.Samples.GET_DOMAINS_FOOBARZ_APPLICATIONS;
 import static com.openshift.client.utils.Samples.GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6;
@@ -25,6 +24,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,7 +34,6 @@ import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.fest.assertions.Condition;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,11 +45,14 @@ import com.openshift.client.IDomain;
 import com.openshift.client.IHttpClient;
 import com.openshift.client.IOpenShiftConnection;
 import com.openshift.client.IUser;
+import com.openshift.client.Message;
 import com.openshift.client.OpenShiftConnectionFactory;
 import com.openshift.client.OpenShiftEndpointException;
 import com.openshift.client.OpenShiftTimeoutException;
 import com.openshift.client.cartridge.EmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
+import com.openshift.client.utils.EmbeddedCartridgeAssert;
+import com.openshift.client.utils.MessageAssert;
 import com.openshift.client.utils.Samples;
 import com.openshift.internal.client.httpclient.HttpClientException;
 import com.openshift.internal.client.httpclient.InternalServerErrorException;
@@ -99,13 +101,13 @@ public class ApplicationResourceTest {
 		// pre-conditions
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/honkabons2/applications/springeap6/events"))).thenReturn(
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/honkabons2/applications/springeap6/events"))).thenReturn(
 				POST_STOP_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_EVENT.getContentAsString());
 		final IApplication app = domain.getApplicationByName("springeap6");
 		// operation
 		app.stop();
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 	}
 
 	@Test
@@ -113,13 +115,13 @@ public class ApplicationResourceTest {
 		// pre-conditions
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"))).thenReturn(
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
 		final IApplication app = domain.getApplicationByName("springeap6");
 		// operation
 		app.stop(true);
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 	}
 
 	@Test
@@ -127,13 +129,13 @@ public class ApplicationResourceTest {
 		// pre-conditions
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"))).thenReturn(
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
 		final IApplication app = domain.getApplicationByName("springeap6");
 		// operation
 		app.start();
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 	}
 
 	@Test
@@ -141,13 +143,13 @@ public class ApplicationResourceTest {
 		// pre-conditions
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"))).thenReturn(
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
 		final IApplication app = domain.getApplicationByName("springeap6");
 		// operation
 		app.restart();
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 
 	}
 
@@ -161,7 +163,7 @@ public class ApplicationResourceTest {
 		// pre-conditions
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
 				.thenThrow(
 						new InternalServerErrorException(
 								"Failed to add event scale-down to application springeap6 due to: Cannot scale a non-scalable application"));
@@ -174,7 +176,7 @@ public class ApplicationResourceTest {
 			assertThat(e.getCause()).isInstanceOf(InternalServerErrorException.class);
 		}
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 	}
 
 	@Ignore("Need higher quotas on stg")
@@ -187,7 +189,7 @@ public class ApplicationResourceTest {
 		// pre-conditions
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
 				.thenThrow(
 						new InternalServerErrorException(
 								"Failed to add event scale-up to application springeap6 due to: Cannot scale a non-scalable application"));
@@ -200,7 +202,7 @@ public class ApplicationResourceTest {
 			assertThat(e.getCause()).isInstanceOf(InternalServerErrorException.class);
 		}
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 	}
 
 	@Test
@@ -210,14 +212,14 @@ public class ApplicationResourceTest {
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6")))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_2ALIAS.getContentAsString());
 		final IApplication app = domain.getApplicationByName("springeap6");
 		assertThat(app.getAliases()).hasSize(1).contains("jbosstools.org");
 		// operation
 		app.addAlias("redhat.com");
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 		assertThat(app.getAliases()).hasSize(2).contains("jbosstools.org", "redhat.com");
 	}
 
@@ -228,7 +230,7 @@ public class ApplicationResourceTest {
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6")))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
 				.thenThrow(
 						new InternalServerErrorException(
 								"Failed to add event add-alias to application springeap6 due to: Alias 'jbosstools.org' already exists for 'springeap6'"));
@@ -243,7 +245,7 @@ public class ApplicationResourceTest {
 		}
 		// verifications
 		assertThat(app.getAliases()).hasSize(1).contains("jbosstools.org");
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 	}
 
 	@Test
@@ -251,14 +253,14 @@ public class ApplicationResourceTest {
 		// pre-conditions
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATONS_SPRINGEAP6_0ALIAS.getContentAsString());
 		final IApplication app = domain.getApplicationByName("springeap6");
 		assertThat(app.getAliases()).hasSize(1).contains("jbosstools.org");
 		// operation
 		app.removeAlias("jbosstools.org");
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 		assertThat(app.getAliases()).hasSize(0);
 	}
 
@@ -269,7 +271,7 @@ public class ApplicationResourceTest {
 				GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6"))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events")))
 				.thenThrow(
 						new InternalServerErrorException(
 								"Failed to add event remove-alias to application springeap6 due to: Alias 'openshift-origin.org' does not exist for 'springeap6'"));
@@ -285,7 +287,7 @@ public class ApplicationResourceTest {
 		}
 		// verifications
 		assertThat(app.getAliases()).hasSize(1).contains("jbosstools.org");
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/events"));
 	}
 
 	@Test
@@ -334,23 +336,38 @@ public class ApplicationResourceTest {
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6/cartridges")))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_CARTRIDGES_1EMBEDDED.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/cartridges")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/cartridges")))
 				.thenReturn(POST_MYSQL_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_CARTRIDGES.getContentAsString());
 		final IApplication app = domain.getApplicationByName("springeap6");
+		String mySql51Name = "mysql-5.1";
+		
 		// operation
-		app.addEmbeddableCartridge(new EmbeddableCartridge("mysql-5.1"));
+		app.addEmbeddableCartridge(new EmbeddableCartridge(mySql51Name));
 		
 		// verifications
-		assertThat(app.getEmbeddedCartridge("mysql-5.1")).satisfies(new Condition<Object>() {
-			@Override
-			public boolean matches(Object value) {
-				final EmbeddedCartridgeResource cartridge = (EmbeddedCartridgeResource) value;
-				return cartridge != null && cartridge.getName() != null
-						&& !LinkRetriever.retrieveLinks(cartridge).isEmpty();
-			}
-		});
-		verify(mockClient, times(1)).post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/cartridges"));
+		verify(mockClient, times(1))
+				.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/cartridges"));
 		assertThat(app.getEmbeddedCartridges()).hasSize(2);
+		IEmbeddedCartridge mySqlCartridge = app.getEmbeddedCartridge(mySql51Name);
+		new EmbeddedCartridgeAssert(mySqlCartridge)
+				.hasDescription()
+				.hasName(mySql51Name);
+
+		new MessageAssert(mySqlCartridge.getMessage(Message.FIELD_DEFAULT))
+				.hasExitCode(-1)
+				.hasText("Added mysql-5.1 to application springeap6");
+		new MessageAssert(mySqlCartridge.getMessage(Message.FIELD_RESULT))
+				.hasExitCode(0)
+				.hasText(
+						"\nMySQL 5.1 database added.  Please make note of these credentials:\n\n"
+								+ "       Root User: adminnFC22YQ\n   Root Password: U1IX8AIlrEcl\n   Database Name: springeap6\n\n"
+								+ "Connection URL: mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/\n\n"
+								+ "You can manage your new MySQL database by also embedding phpmyadmin-3.4.\n"
+								+ "The phpmyadmin username and password will be the same as the MySQL credentials above.\n");
+		new MessageAssert(mySqlCartridge.getMessage(Message.FIELD_APPINFO))
+				.hasExitCode(0)
+				.hasText("Connection URL: mysql://127.13.125.1:3306/\n");
+
 	}
 
 	@Test
@@ -362,7 +379,7 @@ public class ApplicationResourceTest {
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6/cartridges")))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_CARTRIDGES_2EMBEDDED.getContentAsString());
-		when(mockClient.post(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/cartridges")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/cartridges")))
 				.thenThrow(new SocketTimeoutException("mock..."));
 		final IApplication app = domain.getApplicationByName("springeap6");
 		assertThat(app.getEmbeddedCartridges()).hasSize(2);
@@ -374,7 +391,7 @@ public class ApplicationResourceTest {
 			// ok
 		}
 		// verifications
-		verify(mockClient, times(1)).post(anyForm(),
+		verify(mockClient, times(1)).post(anyMapOf(String.class, Object.class),
 				urlEndsWith("/domains/foobarz/applications/springeap6/cartridges"));
 		assertThat(app.getEmbeddedCartridge("postgresql-8.4")).isNull();
 		assertThat(app.getEmbeddedCartridges()).hasSize(2);
@@ -394,7 +411,7 @@ public class ApplicationResourceTest {
 		// operation
 		application.getEmbeddedCartridge("mysql-5.1").destroy();
 		// verifications
-		verify(mockClient, times(1)).delete(anyForm(),
+		verify(mockClient, times(1)).delete(anyMapOf(String.class, Object.class),
 				urlEndsWith("/domains/foobarz/applications/springeap6/cartridges/mysql-5.1"));
 		assertThat(application.getEmbeddedCartridge("mysql-5.1")).isNull();
 		assertThat(application.getEmbeddedCartridges()).hasSize(1);
@@ -409,7 +426,7 @@ public class ApplicationResourceTest {
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
 		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6/cartridges")))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_CARTRIDGES_2EMBEDDED.getContentAsString());
-		when(mockClient.delete(anyForm(), urlEndsWith("/domains/foobarz/applications/springeap6/cartridges/mysql-5.1")))
+		when(mockClient.delete(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications/springeap6/cartridges/mysql-5.1")))
 				.thenThrow(new SocketTimeoutException("mock..."));
 		final IApplication application = domain.getApplicationByName("springeap6");
 		assertThat(application.getEmbeddedCartridges()).hasSize(2);
@@ -422,7 +439,7 @@ public class ApplicationResourceTest {
 			// ok
 		}
 		// verifications
-		verify(mockClient, times(1)).delete(anyForm(),
+		verify(mockClient, times(1)).delete(anyMapOf(String.class, Object.class),
 				urlEndsWith("/domains/foobarz/applications/springeap6/cartridges/mysql-5.1"));
 		assertThat(application.getEmbeddedCartridges()).hasSize(2).contains(mysql);
 	}
@@ -497,6 +514,5 @@ public class ApplicationResourceTest {
 			.onProperty("remoteAddress").containsExactly("127.7.233.2", "127.7.233.3", "127.7.233.1", "127.7.233.1", "127.7.233.1", "127.7.233.1", "127.7.233.1", "127.7.233.1", "127.7.233.1", "5190d701500446506a0000e4-foobarz.rhcloud.com");
 		assertThat(forwardablePorts)
 			.onProperty("remotePort").containsExactly(8080, 8080, 3528, 4447, 5445, 5455, 8080, 9990, 9999, 56756);
-	}
-	
+	}	
 }
