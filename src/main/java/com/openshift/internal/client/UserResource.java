@@ -13,15 +13,7 @@ package com.openshift.internal.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.openshift.client.IDomain;
-import com.openshift.client.IOpenShiftConnection;
-import com.openshift.client.IOpenShiftSSHKey;
-import com.openshift.client.ISSHPublicKey;
-import com.openshift.client.IUser;
-import com.openshift.client.OpenShiftException;
-import com.openshift.client.OpenShiftSSHKeyException;
-import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
-import com.openshift.client.SSHKeyType;
+import com.openshift.client.*;
 import com.openshift.internal.client.response.KeyResourceDTO;
 import com.openshift.internal.client.response.UserResourceDTO;
 import com.openshift.internal.client.utils.Assert;
@@ -242,7 +234,7 @@ public class UserResource extends AbstractOpenShiftResource implements IUser {
 		}
 
 		public List<KeyResourceDTO> execute() throws OpenShiftException {
-			return super.execute();
+			return super.execute(IHttpClient.NO_TIMEOUT);
 		}
 	}
 
@@ -253,7 +245,7 @@ public class UserResource extends AbstractOpenShiftResource implements IUser {
 		}
 
 		public KeyResourceDTO execute(SSHKeyType type, String name, String content) throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_TYPE, type.getTypeId()),
+			return super.execute(IHttpClient.NO_TIMEOUT, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_TYPE, type.getTypeId()),
 					new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_NAME, name), new ServiceParameter(
 							IOpenShiftJsonConstants.PROPERTY_CONTENT, content));
 		}

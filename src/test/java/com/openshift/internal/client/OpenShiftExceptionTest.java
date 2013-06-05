@@ -16,6 +16,7 @@ import static com.openshift.client.utils.UrlEndsWithMatcher.urlEndsWith;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,11 +62,11 @@ public class OpenShiftExceptionTest {
 	@Before
 	public void setup() throws Throwable {
 		mockClient = mock(IHttpClient.class);
-		when(mockClient.get(urlEndsWith("/broker/rest/api")))
+		when(mockClient.get(urlEndsWith("/broker/rest/api"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_API.getContentAsString());
-		when(mockClient.get(urlEndsWith("/user")))
+		when(mockClient.get(urlEndsWith("/user"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_USER_JSON.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains")))
+		when(mockClient.get(urlEndsWith("/domains"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS.getContentAsString());
 		final IOpenShiftConnection connection = 
 				new OpenShiftConnectionFactory().getConnection(
@@ -79,7 +80,7 @@ public class OpenShiftExceptionTest {
 		try {
 			IHttpClient mockClient = mock(IHttpClient.class);
 			// pre-conditions
-			when(mockClient.get(urlEndsWith("/broker/rest/api")))
+			when(mockClient.get(urlEndsWith("/broker/rest/api"),eq(IHttpClient.NO_TIMEOUT)))
 					.thenThrow(
 							new HttpClientException(new ConnectException(
 									"java.net.ConnectException: Connection timed out")));
@@ -98,12 +99,12 @@ public class OpenShiftExceptionTest {
 	public void shouldThrowWithTextAndExistCode() throws Throwable {
 			// pre-conditions
 		try {
-			when(mockClient.delete(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz")))
+			when(mockClient.delete(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz"), eq(IHttpClient.NO_TIMEOUT)))
 					.thenThrow(
-							new BadRequestException(
-									DELETE_DOMAINS_FOOBARZ_KO_EXISTINGAPPS.getContentAsString(),
-									new IOException(
-											"IOException message: Server returned HTTP response code: 400 for URL: https://openshift.redhat.com/broker/rest/domains/foobarz")));
+                            new BadRequestException(
+                                    DELETE_DOMAINS_FOOBARZ_KO_EXISTINGAPPS.getContentAsString(),
+                                    new IOException(
+                                            "IOException message: Server returned HTTP response code: 400 for URL: https://openshift.redhat.com/broker/rest/domains/foobarz")));
 			IDomain domain = user.getDefaultDomain();
 			// operation
 			domain.destroy();

@@ -10,10 +10,7 @@
  ******************************************************************************/
 package com.openshift.internal.client;
 
-import com.openshift.client.IOpenShiftSSHKey;
-import com.openshift.client.OpenShiftException;
-import com.openshift.client.OpenShiftUnknonwSSHKeyTypeException;
-import com.openshift.client.SSHKeyType;
+import com.openshift.client.*;
 import com.openshift.internal.client.response.KeyResourceDTO;
 import com.openshift.internal.client.utils.Assert;
 import com.openshift.internal.client.utils.IOpenShiftJsonConstants;
@@ -69,7 +66,7 @@ public class SSHKeyResource extends AbstractOpenShiftResource implements IOpenSh
 	}
 	
 	public void destroy() throws OpenShiftException {
-		new DeleteKeyRequest().execute();
+		new DeleteKeyRequest().execute(IHttpClient.NO_TIMEOUT);
 		user.removeSSHKey(this);
 		this.name = null;
 		this.type = null;
@@ -92,7 +89,8 @@ public class SSHKeyResource extends AbstractOpenShiftResource implements IOpenSh
 		
 		private KeyResourceDTO execute(SSHKeyType type, String publicKey) throws OpenShiftException {
 			return execute(
-					new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_CONTENT, publicKey), 
+                    IHttpClient.NO_TIMEOUT,
+					new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_CONTENT, publicKey),
 					new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_TYPE, type.getTypeId()));
 		}
 	}
@@ -113,7 +111,7 @@ public class SSHKeyResource extends AbstractOpenShiftResource implements IOpenSh
 		}
 		
 		private void execute() throws OpenShiftException {
-			super.execute();
+			super.execute(IHttpClient.NO_TIMEOUT);
 		}
 	}
 

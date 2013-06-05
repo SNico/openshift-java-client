@@ -37,7 +37,7 @@ public interface IHttpClient {
 	public static final String AUTHORIZATION_BASIC = "Basic";
 
 	public static final int STATUS_OK = 200;
-	public static final int STATUS_INTERNAL_SERVER_ERROR = 200;
+	public static final int STATUS_INTERNAL_SERVER_ERROR = 500;
 	public static final int STATUS_BAD_REQUEST = 400;
 	public static final int STATUS_UNAUTHORIZED = 401;
 	public static final int STATUS_NOT_FOUND = 404;
@@ -48,7 +48,13 @@ public interface IHttpClient {
 	public static final char AMPERSAND = '&';
 	public static final char EQUALS = '=';
 	
-	public static final String VERSION = "version"; 
+	public static final String VERSION = "version";
+
+    public static final int DEFAULT_CONNECT_TIMEOUT = 10 * 	1000;
+    public static final int DEFAULT_READ_TIMEOUT = 2 * 60 * 1000;
+    public static final int NO_TIMEOUT = -1;
+
+    final long timeout = 1000;
 	
 	public void setUserAgent(String userAgent);
 	
@@ -58,16 +64,26 @@ public interface IHttpClient {
 
 	public String getAcceptVersion();
 	
-	public String get(URL url) throws HttpClientException, SocketTimeoutException;
+	//public String get(URL url) throws HttpClientException, SocketTimeoutException;
 
-	public String post(Map<String, Object> parameters, URL url) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+    public String get(URL url, int timeout) throws HttpClientException, SocketTimeoutException;
 
-	public String put(Map<String, Object> parameters, URL url) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+	//public String post(Map<String, Object> parameters, URL url) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
 
-	public String delete(Map<String, Object> parameters, URL url) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+    public String post(Map<String, Object> parameters, URL url, int timeout) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
 
-	public String delete(URL url) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
-	
+	//public String put(Map<String, Object> parameters, URL url) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+
+    public String put(Map<String, Object> parameters, URL url, int timeout) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+
+	//public String delete(Map<String, Object> parameters, URL url) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+
+    public String delete(Map<String, Object> parameters, URL url, int timeout) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+
+	//public String delete(URL url) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+
+    public String delete(URL url, int timeout) throws HttpClientException, SocketTimeoutException, UnsupportedEncodingException;
+
 	public void setAcceptedMediaType(String acceptedMediaType);
 	
 	public String getAcceptedMediaType();

@@ -19,6 +19,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -56,19 +57,19 @@ public class EmbeddedCartridgeTest {
 	public void setUp() throws SocketTimeoutException, HttpClientException, Throwable {
 		// pre-conditions
 		IHttpClient mockClient = mock(IHttpClient.class);
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.get(urlEndsWith("/broker/rest/api")))
+		when(mockClient.get(urlEndsWith("/broker/rest/api"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_API.getContentAsString());
-		when(mockClient.get(urlEndsWith("/user")))
+		when(mockClient.get(urlEndsWith("/user"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_USER_JSON.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains")))
+		when(mockClient.get(urlEndsWith("/domains"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6/cartridges")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6/cartridges"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_CARTRIDGES_2EMBEDDED.getContentAsString());
 		final IOpenShiftConnection connection =
 				new OpenShiftConnectionFactory().getConnection(
@@ -77,7 +78,7 @@ public class EmbeddedCartridgeTest {
 		this.domain = user.getDomain("foobarz");
 		this.application = domain.getApplicationByName("springeap6");
 	}
-	
+
 	@Test
 	public void shouldEqualsOtherCartridge() {
 		// pre-coniditions

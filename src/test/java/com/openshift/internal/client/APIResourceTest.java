@@ -12,6 +12,7 @@ package com.openshift.internal.client;
 
 import static com.openshift.client.utils.UrlEndsWithMatcher.urlEndsWith;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,9 +41,9 @@ public class APIResourceTest {
 	@Before
 	public void setup() throws Throwable {
 		mockClient = mock(IHttpClient.class);
-		when(mockClient.get(urlEndsWith("/broker/rest/api")))
+		when(mockClient.get(urlEndsWith("/broker/rest/api"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_API.getContentAsString());
-		when(mockClient.get(urlEndsWith("/cartridges")))
+		when(mockClient.get(urlEndsWith("/cartridges"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_CARTRIDGES.getContentAsString());
 		connection = new OpenShiftConnectionFactory()
 				.getConnection(new RestService("http://mock", "clientId", mockClient), "foo@redhat.com", "bar");

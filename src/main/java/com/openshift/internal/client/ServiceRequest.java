@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.openshift.internal.client;
 
+import com.openshift.client.IHttpClient;
 import com.openshift.client.OpenShiftException;
 import com.openshift.internal.client.response.Link;
 import com.openshift.internal.client.response.RestResponse;
@@ -47,15 +48,20 @@ public class ServiceRequest {
 			return resource.getLink(linkName);
 		}
 	}
-	
-	public <DTO> DTO execute(final ServiceParameter... parameters) throws OpenShiftException {
+
+    //TODO Should be removed.
+    public <DTO> DTO execute(final ServiceParameter... parameters) throws OpenShiftException {
+        return this.execute(IHttpClient.NO_TIMEOUT, parameters);
+    }
+
+	public <DTO> DTO execute(int timeout, final ServiceParameter... parameters) throws OpenShiftException {
 		final Link link = getLink();
 		if (link == null) {
 			throw new OpenShiftException("Could not request resource, no link present");
 		}
 		// avoid concurrency issues, to prevent reading the links map while it
 		// is still being retrieved
-		final RestResponse response = resource.getService().request(link, parameters);
+		final RestResponse response = resource.getService().request(link, timeout, parameters);
 		if(response != null) {
 			return response.getData();
 		}

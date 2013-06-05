@@ -14,6 +14,7 @@ import static com.openshift.client.utils.UrlEndsWithMatcher.urlEndsWith;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,9 +48,9 @@ public class UserTest {
 	@Before
 	public void setup() throws Throwable {
 		mockClient = mock(IHttpClient.class);
-		when(mockClient.get(urlEndsWith("/broker/rest/api")))
+		when(mockClient.get(urlEndsWith("/broker/rest/api"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_API.getContentAsString());
-		when(mockClient.get(urlEndsWith("/user"))).thenReturn(
+		when(mockClient.get(urlEndsWith("/user"), eq(IHttpClient.NO_TIMEOUT))).thenReturn(
 				Samples.GET_USER_JSON.getContentAsString());
 		final IOpenShiftConnection connection = new OpenShiftConnectionFactory().getConnection(new RestService(
 				SERVER_URL,
@@ -73,9 +74,9 @@ public class UserTest {
 	@Test
 	public void shouldUpdateDomainNamespace() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains")))
+		when(mockClient.get(urlEndsWith("/domains"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_DOMAINS.getContentAsString());
-		when(mockClient.put(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz")))
+		when(mockClient.put(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_DOMAINS_FOOBARS.getContentAsString());
 		final IDomain domain = user.getDomain("foobarz");
 		assertThat(domain).isNotNull();
@@ -87,21 +88,21 @@ public class UserTest {
 		assertThat(updatedDomain).isNotNull();
 		assertThat(updatedDomain.getId()).isEqualTo("foobars");
 		assertThat(LinkRetriever.retrieveLink(updatedDomain, "UPDATE").getHref()).contains("/foobars");
-		verify(mockClient, times(1)).put(anyMapOf(String.class, Object.class), any(URL.class));
+		verify(mockClient, times(1)).put(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Ignore
 	@Test
 	public void shouldLoadEmptyListOfApplications() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains"))).thenReturn(
+		when(mockClient.get(urlEndsWith("/domains"), eq(IHttpClient.NO_TIMEOUT))).thenReturn(
 				Samples.GET_DOMAINS.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains/foobar/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobar/applications"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_DOMAINS_FOOBARZ_APPLICATIONS_NOAPPS.getContentAsString());
 		// operation
 		final List<IApplication> applications = user.getDomains().get(0).getApplications();
 		// verifications
 		assertThat(applications).hasSize(2);
-		verify(mockClient, times(2)).get(any(URL.class));
+		verify(mockClient, times(2)).get(any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 }

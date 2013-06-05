@@ -117,9 +117,9 @@ public abstract class AbstractOpenShiftResource implements IOpenShiftResource {
 			this.linkName = linkName;
 		}
 
-		protected <DTO> DTO execute(ServiceParameter... parameters) throws OpenShiftException {
+		protected <DTO> DTO execute(int timeout, ServiceParameter... parameters) throws OpenShiftException {
 			Link link = getLink(linkName);
-			RestResponse response = getService().request(link, parameters);
+			RestResponse response = getService().request(link, timeout, parameters);
 			
 			// in some cases, there is not response body, just a return code to
 			// indicate that the operation was successful (e.g.: delete domain)

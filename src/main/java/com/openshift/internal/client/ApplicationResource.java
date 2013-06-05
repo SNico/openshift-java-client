@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import com.openshift.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +36,6 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.openshift.client.ApplicationScale;
-import com.openshift.client.IApplication;
-import com.openshift.client.IApplicationPortForwarding;
-import com.openshift.client.IDomain;
-import com.openshift.client.IGearGroup;
-import com.openshift.client.IGearProfile;
-import com.openshift.client.IOpenShiftConnection;
-import com.openshift.client.Message;
-import com.openshift.client.OpenShiftException;
-import com.openshift.client.OpenShiftSSHOperationException;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
@@ -235,27 +226,47 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 	}
 
 	public void destroy() throws OpenShiftException {
-		new DeleteApplicationRequest().execute();
-		domain.removeApplication(this);
+		this.destroy(IHttpClient.NO_TIMEOUT);
 	}
 
-	public void start() throws OpenShiftException {
-		new StartApplicationRequest().execute();
-	}
+    public void destroy(int timeout) throws OpenShiftException {
+        new DeleteApplicationRequest().execute(timeout);
+        domain.removeApplication(this);
+    }
+
+    public void start() throws OpenShiftException {
+        this.start(IHttpClient.NO_TIMEOUT);
+    }
+
+    public void start(int timeout) throws OpenShiftException {
+        new StartApplicationRequest().execute(timeout);
+    }
 
 	public void restart() throws OpenShiftException {
-		new RestartApplicationRequest().execute();
+		this.restart(IHttpClient.NO_TIMEOUT);
 	}
+
+    public void restart(int timeout) throws OpenShiftException {
+        new RestartApplicationRequest().execute(timeout);
+    }
 
 	public void stop() throws OpenShiftException {
-		stop(false);
+		stop(false, IHttpClient.NO_TIMEOUT);
 	}
 
-	public void stop(boolean force) throws OpenShiftException {
+    public void stop(int timeout) throws OpenShiftException {
+        stop(false, timeout);
+    }
+
+    public void stop(boolean force) throws OpenShiftException {
+        this.stop(force, IHttpClient.NO_TIMEOUT);
+    }
+
+    public void stop(boolean force, int timeout) throws OpenShiftException {
 		if (force) {
-			new ForceStopApplicationRequest().execute();
+			new ForceStopApplicationRequest().execute(timeout);
 		} else {
-			new StopApplicationRequest().execute();
+			new StopApplicationRequest().execute(timeout);
 
 		}
 	}
@@ -264,21 +275,33 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 		throw new UnsupportedOperationException();
 	}
 
+    public void scaleDown(int timeout) throws OpenShiftException {
+        new ScaleDownRequest().execute(timeout);
+    }
+
 	public void scaleDown() throws OpenShiftException {
-		new ScaleDownRequest().execute();
+		this.scaleDown(IHttpClient.NO_TIMEOUT);
 	}
+
+    public void scaleUp(int timeout) throws OpenShiftException {
+        new ScaleUpRequest().execute(timeout);
+    }
 
 	public void scaleUp() throws OpenShiftException {
-		new ScaleUpRequest().execute();
+		this.scaleUp(IHttpClient.NO_TIMEOUT);
 	}
 
-	public void addAlias(String alias) throws OpenShiftException {
+	public void addAlias(String alias, int timeout) throws OpenShiftException {
 		Assert.notNull(alias);
 
-		ApplicationResourceDTO applicationDTO = new AddAliasRequest().execute(alias);
+		ApplicationResourceDTO applicationDTO = new AddAliasRequest().execute(alias, timeout);
 		updateAliases(applicationDTO);
 
 	}
+
+    public void addAlias(String alias) throws OpenShiftException {
+        this.addAlias(alias, IHttpClient.NO_TIMEOUT);
+    }
 
 	private void updateAliases(ApplicationResourceDTO applicationDTO) {
 		Assert.notNull(applicationDTO);
@@ -298,11 +321,15 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 	}
 
 	public void removeAlias(String alias) throws OpenShiftException {
-		Assert.notNull(alias);
-
-		ApplicationResourceDTO applicationDTO = new RemoveAliasRequest().execute(alias);
-		updateAliases(applicationDTO);
+		this.removeAlias(alias, IHttpClient.NO_TIMEOUT);
 	}
+
+    public void removeAlias(String alias, int timeout) throws OpenShiftException {
+        Assert.notNull(alias);
+
+        ApplicationResourceDTO applicationDTO = new RemoveAliasRequest().execute(alias, timeout);
+        updateAliases(applicationDTO);
+    }
 
 	public String getGitUrl() {
 		return gitUrl;
@@ -324,20 +351,25 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 	 *            application
 	 */
 	public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
-		Assert.notNull(cartridge);
-
-		if (this.embeddedCartridges == null) {
-			loadEmbeddedCartridges();
-		}
-		final CartridgeResourceDTO embeddedCartridgeDTO =
-				new AddEmbeddedCartridgeRequest().execute(cartridge.getName());
-		final EmbeddedCartridgeResource embeddedCartridge =
-				new EmbeddedCartridgeResource(
-						embeddedCartridgesInfos.get(embeddedCartridgeDTO.getName()),
-						embeddedCartridgeDTO, this);
-		this.embeddedCartridges.add(embeddedCartridge);
-		return embeddedCartridge;
+	    return this.addEmbeddableCartridge(cartridge, IHttpClient.NO_TIMEOUT);
 	}
+
+    public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge, int timeout) throws OpenShiftException {
+
+        Assert.notNull(cartridge);
+
+        if (this.embeddedCartridges == null) {
+            loadEmbeddedCartridges(timeout);
+        }
+        final CartridgeResourceDTO embeddedCartridgeDTO =
+                new AddEmbeddedCartridgeRequest().execute(cartridge.getName(), timeout);
+        final EmbeddedCartridgeResource embeddedCartridge =
+                new EmbeddedCartridgeResource(
+                        embeddedCartridgesInfos.get(embeddedCartridgeDTO.getName()),
+                        embeddedCartridgeDTO, this);
+        this.embeddedCartridges.add(embeddedCartridge);
+        return embeddedCartridge;
+    }
 
 	public List<IEmbeddedCartridge> addEmbeddableCartridges(Collection<IEmbeddableCartridge> cartridges)
 			throws OpenShiftException {
@@ -364,10 +396,10 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 		this.embeddedCartridges.remove(embeddedCartridge);
 	}
 
-	private List<IEmbeddedCartridge> loadEmbeddedCartridges() throws OpenShiftException {
+	private List<IEmbeddedCartridge> loadEmbeddedCartridges(int timeout) throws OpenShiftException {
 		// load collection if necessary
 		this.embeddedCartridges = new ArrayList<IEmbeddedCartridge>();
-		List<CartridgeResourceDTO> cartridgeDTOs = new ListEmbeddableCartridgesRequest().execute();
+		List<CartridgeResourceDTO> cartridgeDTOs = new ListEmbeddableCartridgesRequest().execute(timeout);
 		for (CartridgeResourceDTO cartridgeDTO : cartridgeDTOs) {
 			if (cartridgeDTO.getType() != CartridgeType.EMBEDDED) {
 				continue;
@@ -381,12 +413,16 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 		return embeddedCartridges;
 	}
 
-	public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
+	public List<IEmbeddedCartridge> getEmbeddedCartridges(int timeout) throws OpenShiftException {
 		if (this.embeddedCartridges == null) {
-			this.embeddedCartridges = loadEmbeddedCartridges();
+			this.embeddedCartridges = loadEmbeddedCartridges(timeout);
 		}
 		return CollectionUtils.toUnmodifiableCopy(this.embeddedCartridges);
 	}
+
+    public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
+        return this.getEmbeddedCartridges(IHttpClient.NO_TIMEOUT);
+    }
 
 	public boolean hasEmbeddedCartridge(String cartridgeName) throws OpenShiftException {
 		Assert.notNull(cartridgeName);
@@ -434,16 +470,20 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 		}
 	}
 
+    public Collection<IGearGroup> getGearGroups(int timeout) throws OpenShiftException {
+        if (gearGroups == null) {
+            loadGearGroups(timeout);
+        }
+        return gearGroups;
+    }
+
 	public Collection<IGearGroup> getGearGroups() throws OpenShiftException {
-		if (gearGroups == null) {
-			loadGearGroups();
-		}
-		return gearGroups;
+		return this.getGearGroups(IHttpClient.NO_TIMEOUT);
 	}
 
-	private Collection<IGearGroup> loadGearGroups() throws OpenShiftException {
+	private Collection<IGearGroup> loadGearGroups(int timeout) throws OpenShiftException {
 		List<IGearGroup> gearGroups = new ArrayList<IGearGroup>();
-		Collection<GearGroupResourceDTO> dtos = new GetGearGroupsRequest().execute(); 
+		Collection<GearGroupResourceDTO> dtos = new GetGearGroupsRequest().execute(timeout);
 		for(GearGroupResourceDTO dto : dtos) {
 			gearGroups.add(new GearGroupResource(dto, getService()));
 		}
@@ -495,17 +535,21 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 		return !(System.currentTimeMillis() < (startTime + timeout));
 	}
 
-	public void refresh() throws OpenShiftException {
+	public void refresh(int timeout) throws OpenShiftException {
 		if (this.embeddedCartridges != null) {
-			this.embeddedCartridges = loadEmbeddedCartridges();
+			this.embeddedCartridges = loadEmbeddedCartridges(timeout);
 		}
 		if (this.gearGroups != null) {
-			this.gearGroups = loadGearGroups();
+			this.gearGroups = loadGearGroups(timeout);
 		}
 		if (this.ports != null) {
 			this.ports = loadPorts();
 		}
 	}
+
+    public void refresh(){
+        this.refresh(IHttpClient.NO_TIMEOUT);
+    }
 
 	public void setSSHSession(final Session session) {
 		this.session = session;
@@ -749,8 +793,8 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_START_APPLICATION);
 		}
 
-		public <DTO> DTO execute() throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
+		public <DTO> DTO execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
 					IOpenShiftJsonConstants.VALUE_START));
 		}
 	}
@@ -761,8 +805,8 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_STOP_APPLICATION);
 		}
 
-		public <DTO> DTO execute() throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
+		public <DTO> DTO execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
 					IOpenShiftJsonConstants.VALUE_STOP));
 		}
 	}
@@ -773,8 +817,8 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_FORCE_STOP_APPLICATION);
 		}
 
-		public <DTO> DTO execute() throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
+		public <DTO> DTO execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
 					IOpenShiftJsonConstants.VALUE_FORCESTOP));
 		}
 	}
@@ -785,8 +829,8 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_RESTART_APPLICATION);
 		}
 
-		public <DTO> DTO execute() throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
+		public <DTO> DTO execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
 					IOpenShiftJsonConstants.VALUE_RESTART));
 		}
 	}
@@ -797,8 +841,8 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_SCALE_UP);
 		}
 
-		public <DTO> DTO execute() throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
+		public <DTO> DTO execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
 					IOpenShiftJsonConstants.VALUE_SCALE_UP));
 		}
 	}
@@ -809,8 +853,8 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_SCALE_DOWN);
 		}
 
-		public <DTO> DTO execute() throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
+		public <DTO> DTO execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
 					IOpenShiftJsonConstants.VALUE_SCALE_DOWN));
 		}
 	}
@@ -821,8 +865,8 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_ADD_ALIAS);
 		}
 
-		public <DTO> DTO execute(String alias) throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
+		public <DTO> DTO execute(String alias, int timeout) throws OpenShiftException {
+			return super.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
 					IOpenShiftJsonConstants.VALUE_ADD_ALIAS), new ServiceParameter(
 					IOpenShiftJsonConstants.PROPERTY_ALIAS, alias));
 		}
@@ -834,8 +878,8 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_REMOVE_ALIAS);
 		}
 
-		public <DTO> DTO execute(String alias) throws OpenShiftException {
-			return super.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
+		public <DTO> DTO execute(String alias, int timeout) throws OpenShiftException {
+			return super.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_EVENT,
 					IOpenShiftJsonConstants.VALUE_REMOVE_ALIAS), new ServiceParameter(
 					IOpenShiftJsonConstants.PROPERTY_ALIAS, alias));
 		}
@@ -847,9 +891,9 @@ public class ApplicationResource extends AbstractOpenShiftResource implements IA
 			super(LINK_ADD_CARTRIDGE);
 		}
 
-		public <DTO> DTO execute(String embeddedCartridgeName) throws OpenShiftException {
+		public <DTO> DTO execute(String embeddedCartridgeName, int timeout) throws OpenShiftException {
 			return super
-					.execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_NAME, embeddedCartridgeName));
+					.execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_NAME, embeddedCartridgeName));
 		}
 	}
 

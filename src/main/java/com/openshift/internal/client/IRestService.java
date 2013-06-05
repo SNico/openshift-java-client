@@ -25,16 +25,16 @@ public interface IRestService {
 
 	public static final String SERVICE_VERSION = "1.2";
 
-	public abstract RestResponse request(Link link)
+	public abstract RestResponse request(Link link, int timeout)
 			throws OpenShiftException, SocketTimeoutException;
 
-	public RestResponse request(Link link, ServiceParameter... serviceParameters)
+	public RestResponse request(Link link, int timeout, ServiceParameter... serviceParameters)
 			throws OpenShiftException;
 	
-	public abstract RestResponse request(Link link, Map<String, Object> parameters)
+	public abstract RestResponse request(Link link, Map<String, Object> parameters, int timeout)
 			throws OpenShiftException;
 
-	public abstract String request(String url, HttpMethod httpMethod, Map<String, Object> parameters)
+	public abstract String request(String url, HttpMethod httpMethod, Map<String, Object> parameters, int timeout)
 			throws OpenShiftException;
 
 	public abstract String getServiceUrl();

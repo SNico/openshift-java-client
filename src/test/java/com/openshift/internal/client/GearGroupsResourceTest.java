@@ -16,6 +16,7 @@ import static com.openshift.client.utils.Samples.GET_DOMAINS_FOOBARZ_APPLICATION
 import static com.openshift.client.utils.Samples.GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_GEARGROUPS;
 import static com.openshift.client.utils.UrlEndsWithMatcher.urlEndsWith;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,11 +48,11 @@ public class GearGroupsResourceTest {
 	@Before
 	public void setup() throws Throwable {
 		mockClient = mock(IHttpClient.class);
-		when(mockClient.get(urlEndsWith("/broker/rest/api")))
+		when(mockClient.get(urlEndsWith("/broker/rest/api"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_API.getContentAsString());
-		when(mockClient.get(urlEndsWith("/user"))).thenReturn(
+		when(mockClient.get(urlEndsWith("/user"), eq(IHttpClient.NO_TIMEOUT))).thenReturn(
 				Samples.GET_USER_JSON.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains"))).thenReturn(GET_DOMAINS.getContentAsString());
+		when(mockClient.get(urlEndsWith("/domains"), eq(IHttpClient.NO_TIMEOUT))).thenReturn(GET_DOMAINS.getContentAsString());
 		final IOpenShiftConnection connection =
 				new OpenShiftConnectionFactory().getConnection(
 						new RestService("http://mock", "clientId", mockClient), "foo@redhat.com", "bar");
@@ -62,11 +63,11 @@ public class GearGroupsResourceTest {
 	@Test
 	public void shouldGetGearGroups() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6/gear_groups")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications/springeap6/gear_groups"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_SPRINGEAP6_GEARGROUPS.getContentAsString());
 		final IApplication app = domain.getApplicationByName("springeap6");
 		// operation

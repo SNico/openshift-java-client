@@ -23,6 +23,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -88,10 +89,10 @@ public class DomainResourceTest {
 
 	private IHttpClient createMockClient(Samples domainsResponse) throws SocketTimeoutException, Throwable {
 		IHttpClient mockClient = mock(IHttpClient.class);
-		when(mockClient.get(urlEndsWith("/broker/rest/api")))
+		when(mockClient.get(urlEndsWith("/broker/rest/api"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(Samples.GET_API.getContentAsString());
-		when(mockClient.get(urlEndsWith("/user"))).thenReturn(Samples.GET_USER_JSON.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains"))).thenReturn(domainsResponse.getContentAsString());
+		when(mockClient.get(urlEndsWith("/user"), eq(IHttpClient.NO_TIMEOUT))).thenReturn(Samples.GET_USER_JSON.getContentAsString());
+		when(mockClient.get(urlEndsWith("/domains"), eq(IHttpClient.NO_TIMEOUT))).thenReturn(domainsResponse.getContentAsString());
 		return mockClient;
 	}
 
@@ -111,7 +112,7 @@ public class DomainResourceTest {
 		// verifications
 		assertThat(domains).hasSize(0);
 		// 3 calls: /API + /API/user + /API/domains
-		verify(client, times(3)).get(any(URL.class));
+		verify(client, times(3)).get(any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
@@ -122,13 +123,13 @@ public class DomainResourceTest {
 		// verifications
 		assertThat(domains).hasSize(1);
 		// 3 calls: /API + /API/user + /API/domains
-		verify(mockClient, times(3)).get(any(URL.class));
+		verify(mockClient, times(3)).get(any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
 	public void shouldCreateNewDomain() throws Throwable {
 		// pre-conditions
-		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains"))).thenReturn(
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains"), eq(IHttpClient.NO_TIMEOUT))).thenReturn(
 				GET_DOMAINS_FOOBARS.getContentAsString());
 		int numOfDomains = user.getDomains().size();
 		// operation
@@ -151,7 +152,7 @@ public class DomainResourceTest {
 	@Test
 	public void shouldDestroyDomain() throws Throwable {
 		// pre-conditions
-		when(mockClient.delete(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobar")))
+		when(mockClient.delete(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobar"), eq(IHttpClient.NO_TIMEOUT)))
 			.thenReturn(DELETE_DOMAINS_FOOBARZ.getContentAsString());
 		// operation
 		final IDomain domain = user.getDomain("foobarz");
@@ -164,7 +165,7 @@ public class DomainResourceTest {
 	@Test
 	public void shouldNotDestroyDomainWithApp() throws Throwable {
 		// pre-conditions
-		when(mockClient.delete(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz")))
+		when(mockClient.delete(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz"),eq(IHttpClient.NO_TIMEOUT)))
 			.thenThrow(new BadRequestException(
 					"Domain contains applications. Delete applications first or set force to true.", null));
 		// operation
@@ -183,7 +184,7 @@ public class DomainResourceTest {
 	@Test
 	public void shouldUpdateDomainId() throws Throwable {
 		// pre-conditions
-		when(mockClient.put(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz")))
+		when(mockClient.put(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz"), eq(IHttpClient.NO_TIMEOUT)))
 			.thenReturn(GET_DOMAINS_FOOBARS.getContentAsString());
 		final IDomain domain = user.getDomain("foobarz");
 		// operation
@@ -194,7 +195,7 @@ public class DomainResourceTest {
 		assertThat(updatedDomain).isNotNull();
 		assertThat(updatedDomain.getId()).isEqualTo("foobars");
 		assertThat(LinkRetriever.retrieveLink(updatedDomain, "UPDATE").getHref()).contains("/foobars");
-		verify(mockClient, times(1)).put(anyMapOf(String.class, Object.class), any(URL.class));
+		verify(mockClient, times(1)).put(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
@@ -211,9 +212,9 @@ public class DomainResourceTest {
 	@Test
 	public void shouldRefreshDomainAndReloadApplications() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		final IDomain domain = user.getDomain("foobarz");
 		assertThat(domain).isNotNull();
@@ -221,30 +222,30 @@ public class DomainResourceTest {
 		// operation
 		domain.refresh();
 		// verifications
-		verify(mockClient, times(1)).get(urlEndsWith("/domains/foobarz")); // explicit refresh on this location
-		verify(mockClient, times(2)).get(urlEndsWith("/domains/foobarz/applications")); // two calls, before and while refresh
+		verify(mockClient, times(1)).get(urlEndsWith("/domains/foobarz"),eq(IHttpClient.NO_TIMEOUT)); // explicit refresh on this location
+		verify(mockClient, times(2)).get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)); // two calls, before and while refresh
 	}
 
 	@Test
 	public void shouldRefreshDomainAndNotReloadApplications() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ.getContentAsString());
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		final IDomain domain = user.getDomain("foobarz");
 		assertThat(domain).isNotNull();
 		// operation
 		domain.refresh();
 		// verifications
-		verify(mockClient, times(1)).get(urlEndsWith("/domains")); // explicit refresh on this location
-		verify(mockClient, times(0)).get(urlEndsWith("/domains/foobarz/applications")); // no call, neither before and while refresh
+		verify(mockClient, times(1)).get(urlEndsWith("/domains"),eq(IHttpClient.NO_TIMEOUT)); // explicit refresh on this location
+		verify(mockClient, times(0)).get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)); // no call, neither before and while refresh
 	}
 
 	@Test
 	public void shouldLoadListOfApplicationsWithNoElement() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_NOAPPS.getContentAsString());
 		// operation
 		final List<IApplication> apps = domain.getApplications();
@@ -252,13 +253,13 @@ public class DomainResourceTest {
 		assertThat(apps).isEmpty();
 		// 4 calls: /API + /API/user + /API/domains +
 		// /API/domains/foobar/applications
-		verify(mockClient, times(4)).get(any(URL.class));
+		verify(mockClient, times(4)).get(any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
 	public void shouldLoadListOfApplicationsWith2Elements() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		final List<IApplication> apps = domain.getApplications();
@@ -266,13 +267,13 @@ public class DomainResourceTest {
 		assertThat(apps).hasSize(2);
 		// 4 calls: /API + /API/user + /API/domains +
 		// /API/domains/foobarz/applications
-		verify(mockClient, times(4)).get(any(URL.class));
+		verify(mockClient, times(4)).get(any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
 	public void shouldNotLoadApplicationTwice() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		List<IApplication> apps = domain.getApplications();
@@ -281,7 +282,7 @@ public class DomainResourceTest {
 		// verifications
 		reset(mockClient);
 		apps = domain.getApplications(); // dont do new client request
-		verify(mockClient, times(0)).get(any(URL.class));
+		verify(mockClient, times(0)).get(any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 
 	}
 	
@@ -289,7 +290,7 @@ public class DomainResourceTest {
 	public void shouldNotLoadListOfApplicationsWithInvalidCredentials() 
 			throws OpenShiftException, HttpClientException, SocketTimeoutException {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenThrow(new UnauthorizedException("invalid credentials (mock)", null));
 		// operation
 		domain.getApplications();
@@ -300,10 +301,10 @@ public class DomainResourceTest {
 	@Test
 	public void shouldCreateApplication() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 			.thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS_NOAPPS.getContentAsString());
-		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications"))).thenReturn(
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications"), eq(IHttpClient.NO_TIMEOUT))).thenReturn(
 				POST_SCALABLE_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		final IApplication app = domain.createApplication("sample", CARTRIDGE_JBOSSAS_7, ApplicationScale.NO_SCALE, null);
@@ -326,9 +327,9 @@ public class DomainResourceTest {
 	@Test
 	public void shouldRequestCreateApplicationWithNameAndCartridgeOnly() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_NOAPPS.getContentAsString());
-		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(POST_SCALABLE_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		domain.createApplication("foo", CARTRIDGE_JBOSSAS_7);
@@ -342,9 +343,9 @@ public class DomainResourceTest {
 	@Test
 	public void shouldRequestCreateApplicationWithNameCartridgeAndScaleOnly() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_NOAPPS.getContentAsString());
-		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(POST_SCALABLE_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		domain.createApplication("foo", CARTRIDGE_JBOSSAS_7, ApplicationScale.SCALE);
@@ -359,9 +360,9 @@ public class DomainResourceTest {
 	@Test
 	public void shouldRequestCreateApplicationWithNameCartridgeScaleGearProfileOnly() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_NOAPPS.getContentAsString());
-		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(POST_SCALABLE_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		domain.createApplication("foo", CARTRIDGE_JBOSSAS_7, ApplicationScale.SCALE, GearProfile.JUMBO);
@@ -378,9 +379,9 @@ public class DomainResourceTest {
 	@Test
 	public void shouldRequestCreateApplicationWithNameCartridgeScaleGearProfileAndGitUrl() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS_NOAPPS.getContentAsString());
-		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.post(anyMapOf(String.class, Object.class), urlEndsWith("/domains/foobarz/applications"), eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(POST_SCALABLE_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		domain.createApplication("foo", CARTRIDGE_JBOSSAS_7, ApplicationScale.SCALE, GearProfile.JUMBO, "git://github.com/adietish/openshift-java-client.git");
@@ -416,7 +417,7 @@ public class DomainResourceTest {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void assertPostParameters(IHttpClient client, Pair... pairs) throws SocketTimeoutException, HttpClientException, UnsupportedEncodingException {
 		ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-		verify(mockClient).post(captor.capture(), any(URL.class));
+		verify(mockClient).post(captor.capture(), any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 		Map postedParameters = captor.getValue();
 		assertThat(postedParameters).hasSize(pairs.length);
 		for(Pair pair: pairs) {
@@ -427,7 +428,7 @@ public class DomainResourceTest {
 	@Test(expected = OpenShiftException.class)
 	public void shouldNotCreateApplicationWithMissingName() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		domain.createApplication(null, CARTRIDGE_JBOSSAS_7, null, null);
@@ -438,7 +439,7 @@ public class DomainResourceTest {
 	@Test(expected = OpenShiftException.class)
 	public void shouldNotCreateApplicationWithMissingCartridge() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		domain.createApplication("foo", null, null, null);
@@ -449,7 +450,7 @@ public class DomainResourceTest {
 	@Test
 	public void shouldNotRecreateExistingApplication() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications")))
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT)))
 				.thenReturn(GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		try {
@@ -466,7 +467,7 @@ public class DomainResourceTest {
 	@Test
 	public void shouldGetApplicationByNameCaseInsensitive() throws Throwable {
 		// pre-conditions
-		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"))).thenReturn(
+		when(mockClient.get(urlEndsWith("/domains/foobarz/applications"),eq(IHttpClient.NO_TIMEOUT))).thenReturn(
 				GET_DOMAINS_FOOBARZ_APPLICATIONS.getContentAsString());
 		// operation
 		IApplication lowerCaseQueryResult = domain.getApplicationByName("springeap6");

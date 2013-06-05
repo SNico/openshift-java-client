@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.openshift.client.IApplication;
+import com.openshift.client.IHttpClient;
 import com.openshift.client.Message;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.EmbeddableCartridge;
@@ -122,7 +123,7 @@ public class EmbeddedCartridgeResource extends AbstractOpenShiftResource impleme
 	}
 	
 	public void destroy() throws OpenShiftException {
-		new DeleteCartridgeRequest().execute();
+		new DeleteCartridgeRequest().execute(IHttpClient.NO_TIMEOUT);
 		application.removeEmbeddedCartridge(this);
 	}
 

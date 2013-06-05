@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.openshift.internal.client.httpclient.UrlConnectionHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,12 +78,12 @@ public class RestService implements IRestService {
 		client.setUserAgent(userAgent);
 	}
 
-	public RestResponse request(Link link) throws OpenShiftException {
-		return request(link, (Map<String, Object>) null);
+	public RestResponse request(Link link, int timeout) throws OpenShiftException {
+		return request(link, (Map<String, Object>) null, timeout);
 	}
 
-	public RestResponse request(Link link, ServiceParameter... serviceParameters) throws OpenShiftException {
-		return request(link, toMap(serviceParameters));
+	public RestResponse request(Link link, int timeout, ServiceParameter... serviceParameters) throws OpenShiftException {
+		return request(link, toMap(serviceParameters), timeout);
 	}
 
 	private Map<String, Object> toMap(ServiceParameter... serviceParameters) {
@@ -93,18 +94,18 @@ public class RestService implements IRestService {
 		return parameterMap;
 	}
 
-	public RestResponse request(Link link, Map<String, Object> parameters)
+	public RestResponse request(Link link, Map<String, Object> parameters, int timeout)
 			throws OpenShiftException {
 		validateParameters(parameters, link);
 		HttpMethod httpMethod = link.getHttpMethod();
-		String response = request(link.getHref(), httpMethod, parameters);
+		String response = request(link.getHref(), httpMethod, parameters, timeout);
 		return ResourceDTOFactory.get(response);
 	}
 
-	public String request(String href, HttpMethod httpMethod, Map<String, Object> parameters) throws OpenShiftException {
+	public String request(String href, HttpMethod httpMethod, Map<String, Object> parameters, int timeout) throws OpenShiftException {
 		URL url = getUrl(href);
 		try {
-			return request(url, httpMethod, parameters);
+			return request(url, httpMethod, parameters, timeout);
 		} catch (UnsupportedEncodingException e) {
 			throw new OpenShiftException(e, e.getMessage());
 		} catch (UnauthorizedException e) {
@@ -141,26 +142,27 @@ public class RestService implements IRestService {
 		}
 	}
 
-	private String request(URL url, HttpMethod httpMethod, Map<String, Object> parameters)
-			throws HttpClientException, SocketTimeoutException, OpenShiftException, UnsupportedEncodingException {
-		LOGGER.info("Requesting {} with protocol {} on {}",
-				new Object[] { httpMethod.name(), client.getAcceptVersion(), url });
-		
-		switch (httpMethod) {
-		case GET:
-			return client.get(url);
-		case POST:
-			return client.post(parameters, url);
-		case PUT:
-			return client.put(parameters, url);
-		case DELETE:
-			return client.delete(parameters, url);
-		default:
-			throw new OpenShiftException("Unexpected HTTP method {0}", httpMethod.toString());
-		}
-		
-		
-	}
+    public String request(URL url, HttpMethod httpMethod, Map<String, Object> parameters, int timeout)
+            throws HttpClientException, SocketTimeoutException, OpenShiftException, UnsupportedEncodingException {
+        LOGGER.info("Requesting {} with protocol {} on {}",
+                new Object[] { httpMethod.name(), client.getAcceptVersion(), url });
+
+        switch (httpMethod) {
+            case GET:
+                return client.get(url, timeout);
+            case POST:
+                return client.post(parameters, url, timeout);
+            case PUT:
+                return client.put(parameters, url, timeout);
+            case DELETE:
+                return client.delete(parameters, url, timeout);
+            default:
+                throw new OpenShiftException("Unexpected HTTP method {0}", httpMethod.toString());
+        }
+
+    }
+
+
 	
 	private URL getUrl(String href) throws OpenShiftException {
 		try {

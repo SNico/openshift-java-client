@@ -16,10 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.openshift.client.IDomain;
-import com.openshift.client.IOpenShiftConnection;
-import com.openshift.client.IUser;
-import com.openshift.client.OpenShiftException;
+import com.openshift.client.*;
 import com.openshift.client.cartridge.EmbeddableCartridge;
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 import com.openshift.client.cartridge.IStandaloneCartridge;
@@ -95,21 +92,27 @@ public class APIResource extends AbstractOpenShiftResource implements IOpenShift
 
 	public IUser getUser() throws OpenShiftException {
 		if (user == null) {
-			this.user = new UserResource(this, new GetUserRequest().execute(), this.password);
+			this.user = new UserResource(this, new GetUserRequest().execute(IHttpClient.NO_TIMEOUT), this.password);
 		}
 		return this.user;
 	}
 
-	public List<IDomain> getDomains() throws OpenShiftException {
+    public List<IDomain> getDomains() throws OpenShiftException {
+        return this.getDomains(IHttpClient.NO_TIMEOUT);
+    }
+
+    public List<IDomain> getDomains(int timeout) throws OpenShiftException {
 		if (domains == null) {
-			this.domains = loadDomains();
+			this.domains = loadDomains(timeout);
 		}
 		return CollectionUtils.toUnmodifiableCopy(this.domains);
 	}
 
-	private List<IDomain> loadDomains() throws OpenShiftException {
+
+
+	private List<IDomain> loadDomains(int timeout) throws OpenShiftException {
 		List<IDomain> domains = new ArrayList<IDomain>();
-		for (DomainResourceDTO domainDTO : new ListDomainsRequest().execute()) {
+		for (DomainResourceDTO domainDTO : new ListDomainsRequest().execute(timeout)) {
 			domains.add(new DomainResource(domainDTO, this));
 		}
 		return domains;
@@ -133,15 +136,19 @@ public class APIResource extends AbstractOpenShiftResource implements IOpenShift
 		}
 		return null;
 	}
-	
-	public IDomain createDomain(String id) throws OpenShiftException {
+
+    public IDomain createDomain(String id) throws OpenShiftException {
+        return this.createDomain(id, IHttpClient.NO_TIMEOUT);
+    }
+
+    public IDomain createDomain(String id, int timeout) throws OpenShiftException {
 		Assert.notNull(id);
 
 		if (hasDomain(id)) {
 			throw new OpenShiftException("Domain {0} already exists", id);
 		}
 
-		final DomainResourceDTO domainDTO = new AddDomainRequest().execute(id);
+		final DomainResourceDTO domainDTO = new AddDomainRequest().execute(id, timeout);
 		final IDomain domain = new DomainResource(domainDTO, this);
 		this.domains.add(domain);
 		return domain;
@@ -161,8 +168,8 @@ public class APIResource extends AbstractOpenShiftResource implements IOpenShift
 		return CollectionUtils.toUnmodifiableCopy(embeddedCartridgeNames);
 	}
 
-	private void retrieveCartridges() throws OpenShiftException {
-		final List<CartridgeResourceDTO> cartridgeDTOs = new GetCartridgesRequest().execute();
+	private void retrieveCartridges(int timeout) throws OpenShiftException {
+		final List<CartridgeResourceDTO> cartridgeDTOs = new GetCartridgesRequest().execute(timeout);
 		for (CartridgeResourceDTO cartridgeDTO : cartridgeDTOs) {
 			// TODO replace by enum (standalone, embedded)
 			switch (cartridgeDTO.getType()) {
@@ -180,8 +187,12 @@ public class APIResource extends AbstractOpenShiftResource implements IOpenShift
 			}
 		}
 	}
-	
-	@Override
+
+    private void retrieveCartridges() throws OpenShiftException {
+        this.retrieveCartridges(IHttpClient.NO_TIMEOUT);
+    }
+
+        @Override
 	public void refresh() throws OpenShiftException {
 		this.domains = null;
 	}
@@ -217,8 +228,8 @@ public class APIResource extends AbstractOpenShiftResource implements IOpenShift
 			super("ADD_DOMAIN");
 		}
 
-		public DomainResourceDTO execute(String namespace) throws OpenShiftException {
-			return execute(new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_ID, namespace));
+		public DomainResourceDTO execute(String namespace, int timeout) throws OpenShiftException {
+			return execute(timeout, new ServiceParameter(IOpenShiftJsonConstants.PROPERTY_ID, namespace));
 		}
 	}
 
@@ -228,8 +239,8 @@ public class APIResource extends AbstractOpenShiftResource implements IOpenShift
 			super("LIST_DOMAINS");
 		}
 
-		public List<DomainResourceDTO> execute() throws OpenShiftException {
-			return super.execute();
+		public List<DomainResourceDTO> execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout);
 		}
 	}
 
@@ -239,8 +250,8 @@ public class APIResource extends AbstractOpenShiftResource implements IOpenShift
 			super("GET_USER");
 		}
 
-		public UserResourceDTO execute() throws OpenShiftException {
-			return super.execute();
+		public UserResourceDTO execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout);
 		}
 	}
 
@@ -250,8 +261,8 @@ public class APIResource extends AbstractOpenShiftResource implements IOpenShift
 			super("LIST_CARTRIDGES");
 		}
 
-		public List<CartridgeResourceDTO> execute() throws OpenShiftException {
-			return super.execute();
+		public List<CartridgeResourceDTO> execute(int timeout) throws OpenShiftException {
+			return super.execute(timeout);
 		}
 	}
 }

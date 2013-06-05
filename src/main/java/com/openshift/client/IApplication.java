@@ -96,7 +96,16 @@ public interface IApplication extends IOpenShiftResource {
 	 */
 	public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException;
 
-	/**
+    /**
+     * Adds the given embeddable cartridge to this application.
+     *
+     * @param cartridge
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public IEmbeddedCartridge addEmbeddableCartridge(IEmbeddableCartridge cartridge, int timeout) throws OpenShiftException;
+
+    /**
 	 * Adds all given embedded cartridges from this app, given their names.
 	 * 
 	 * @param embeddedCartridges
@@ -119,6 +128,20 @@ public interface IApplication extends IOpenShiftResource {
 	 * @see #removeEmbeddedCartridge(IEmbeddedCartridge)
 	 */
 	public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException;
+
+    /**
+     * Returns all embedded cartridges.
+     *
+     * @param timeout
+     * @return all embedded cartridges.
+     * @throws OpenShiftException
+     *
+     * @see IEmbeddedCartridge
+     * @see #addEmbeddableCartridge(IEmbeddedCartridge)
+     * @see #removeEmbeddedCartridge(IEmbeddedCartridge)
+     */
+    public List<IEmbeddedCartridge> getEmbeddedCartridges(int timeout) throws OpenShiftException;
+
 
 	/**
 	 * Returns <code>true</code> if this application has an embedded cartridge.
@@ -201,8 +224,15 @@ public interface IApplication extends IOpenShiftResource {
 	 * @throws OpenShiftException
 	 */
 	public Collection<IGearGroup> getGearGroups() throws OpenShiftException;
-	
-	/**
+
+    /**
+     * Returns the gear groups for this application
+     * @return
+     * @throws OpenShiftException
+     */
+    public Collection<IGearGroup> getGearGroups(int timeout) throws OpenShiftException;
+
+    /**
 	 * Returns the timestamp at which this app was created.
 	 * 
 	 * @return the creation time
@@ -221,12 +251,32 @@ public interface IApplication extends IOpenShiftResource {
 	 */
 	public void destroy() throws OpenShiftException;
 
+    /**
+     * Destroys this application (and removes it from the list of available
+     * applications)
+     *
+     * @param timeout
+     * @throws OpenShiftException
+     *
+     * @see IUser#getApplications()
+     */
+    public void destroy(int timeout) throws OpenShiftException;
+
+
 	/**
 	 * Starts this application. Has no effect if this app is already running.
 	 * 
 	 * @throws OpenShiftException
 	 */
 	public void start() throws OpenShiftException;
+
+    /**
+     * Starts this application. Has no effect if this app is already running.
+     *
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public void start(int timeout) throws OpenShiftException;
 
 	/**
 	 * Restarts this application.
@@ -235,12 +285,27 @@ public interface IApplication extends IOpenShiftResource {
 	 */
 	public void restart() throws OpenShiftException;
 
+    /**
+     * Restarts this application.
+     *
+     * @throws OpenShiftException
+     */
+    public void restart(int timeout) throws OpenShiftException;
+
 	/**
 	 * Stops this application.
 	 * 
 	 * @throws OpenShiftException
 	 */
 	public void stop() throws OpenShiftException;
+
+    /**
+     * Stops this application.
+     *
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public void stop(int timeout) throws OpenShiftException;
 
 	/**
 	 * Stops this application
@@ -251,6 +316,16 @@ public interface IApplication extends IOpenShiftResource {
 	 * @throws OpenShiftException
 	 */
 	public void stop(boolean force) throws OpenShiftException;
+
+    /**
+     * Stops this application
+     *
+     * @param force
+     *            : true to force stop, false otherwise
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public void stop(boolean force, int timeout) throws OpenShiftException;
 
 	/**
 	 * Waits for this application to become accessible on its public url.
@@ -292,6 +367,14 @@ public interface IApplication extends IOpenShiftResource {
 	 */
 	public void scaleDown() throws OpenShiftException;
 
+    /**
+     * Scale down application
+     *
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public void scaleDown(int timeout) throws OpenShiftException;
+
 	/**
 	 * Scale up application
 	 * 
@@ -299,12 +382,29 @@ public interface IApplication extends IOpenShiftResource {
 	 */
 	public void scaleUp() throws OpenShiftException;
 
+    /**
+     * Scale up application
+     *
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public void scaleUp(int timeout) throws OpenShiftException;
+
+
 	/**
 	 * Add application alias
 	 * 
 	 * @throws OpenShiftException
 	 */
 	public void addAlias(String string) throws OpenShiftException;
+
+    /**
+     * Add application alias
+     *
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public void addAlias(String string, int timeout) throws OpenShiftException;
 
 	/**
 	 * Retrieve all application aliases
@@ -322,6 +422,14 @@ public interface IApplication extends IOpenShiftResource {
 	 */
 	public void removeAlias(String alias) throws OpenShiftException;
 
+    /**
+     * Remove application alias
+     *
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public void removeAlias(String alias, int timeout) throws OpenShiftException;
+
 	/**
 	 * Refresh the application but reloading its content from OpenShift. At the
 	 * same time, this operation automatically set the embedded cartridges back
@@ -330,6 +438,16 @@ public interface IApplication extends IOpenShiftResource {
 	 * @throws OpenShiftException
 	 */
 	public void refresh() throws OpenShiftException;
+
+    /**
+     * Refresh the application but reloading its content from OpenShift. At the
+     * same time, this operation automatically set the embedded cartridges back
+     * to an 'unloaded' state.
+     *
+     * @param timeout
+     * @throws OpenShiftException
+     */
+    public void refresh(int timeout) throws OpenShiftException;
 
 	/**
 	 * Sets the SSH session that this application will use to connect to

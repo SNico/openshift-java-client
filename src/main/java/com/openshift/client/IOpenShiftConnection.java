@@ -46,6 +46,15 @@ public interface IOpenShiftConnection {
 	 */
 	public List<IDomain> getDomains() throws OpenShiftException;
 
+    /**
+     * Returns the domains associated with the current OpenShift connection.
+     *
+     * @param timeout Maximum amount of clock time (in milliseconds) for the request.
+     * @return the domains
+     * @throws OpenShiftException
+     */
+    public List<IDomain> getDomains(int timeout) throws OpenShiftException;
+
 	/**
 	 * Returns the available standalone cartridges associated with the current
 	 * OpenShift connection.

@@ -14,6 +14,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -63,10 +64,10 @@ public class RestServiceTest {
 		this.clientMock = mock(IHttpClient.class);
 		String jsonResponse = "{}";
 		when(clientMock.getAcceptVersion()).thenReturn(IRestService.SERVICE_VERSION);
-		when(clientMock.get(any(URL.class))).thenReturn(jsonResponse);
-		when(clientMock.post(anyMapOf(String.class, Object.class), any(URL.class))).thenReturn(jsonResponse);
-		when(clientMock.put(anyMapOf(String.class, Object.class), any(URL.class))).thenReturn(jsonResponse);
-		when(clientMock.delete(anyMapOf(String.class, Object.class), any(URL.class))).thenReturn(jsonResponse);
+		when(clientMock.get(any(URL.class), eq(IHttpClient.NO_TIMEOUT))).thenReturn(jsonResponse);
+		when(clientMock.post(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT))).thenReturn(jsonResponse);
+		when(clientMock.put(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT))).thenReturn(jsonResponse);
+		when(clientMock.delete(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT))).thenReturn(jsonResponse);
 
 		OpenShiftTestConfiguration configuration = new OpenShiftTestConfiguration();
 		this.service = new RestService(configuration.getStagingServer(), configuration.getClientId(), clientMock);
@@ -78,49 +79,49 @@ public class RestServiceTest {
 		LinkParameter parameter =
 				new LinkParameter("required string parameter", LinkParameterType.STRING, null, null, null);
 		Link link = new Link("1 required parameter", "/dummy", HttpMethod.GET, Arrays.asList(parameter), null);
-		service.request(link, new HashMap<String, Object>());
+		service.request(link, new HashMap<String, Object>(), IHttpClient.NO_TIMEOUT);
 	}
 
 	@Test
 	public void shouldNotThrowIfNoReqiredParameter() throws OpenShiftException, SocketTimeoutException {
 		// operation
 		Link link = new Link("0 required parameter", "/dummy", HttpMethod.GET, null, null);
-		service.request(link, new HashMap<String, Object>());
+		service.request(link, new HashMap<String, Object>(), IHttpClient.NO_TIMEOUT);
 	}
 
 	@Test
 	public void shouldGetIfGetHttpMethod() throws OpenShiftException, SocketTimeoutException, HttpClientException {
 		// operation
-		service.request(new Link("0 required parameter", "http://www.redhat.com", HttpMethod.GET, null, null));
+		service.request(new Link("0 required parameter", "http://www.redhat.com", HttpMethod.GET, null, null), IHttpClient.NO_TIMEOUT);
 		// verifications
-		verify(clientMock, times(1)).get(any(URL.class));
+		verify(clientMock, times(1)).get(any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
 	public void shouldPostIfPostHttpMethod() throws OpenShiftException, SocketTimeoutException, HttpClientException,
 			UnsupportedEncodingException {
 		// operation
-		service.request(new Link("0 required parameter", "http://www.redhat.com", HttpMethod.POST, null, null));
+		service.request(new Link("0 required parameter", "http://www.redhat.com", HttpMethod.POST, null, null), IHttpClient.NO_TIMEOUT);
 		// verifications
-		verify(clientMock, times(1)).post(anyMapOf(String.class, Object.class), any(URL.class));
+		verify(clientMock, times(1)).post(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
 	public void shouldPutIfPutHttpMethod() throws OpenShiftException, SocketTimeoutException, HttpClientException,
 			UnsupportedEncodingException {
 		// operation
-		service.request(new Link("0 required parameter", "http://www.redhat.com", HttpMethod.PUT, null, null));
+		service.request(new Link("0 required parameter", "http://www.redhat.com", HttpMethod.PUT, null, null), IHttpClient.NO_TIMEOUT);
 		// verifications
-		verify(clientMock, times(1)).put(anyMapOf(String.class, Object.class), any(URL.class));
+		verify(clientMock, times(1)).put(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
 	public void shouldDeleteIfDeleteHttpMethod() throws OpenShiftException, SocketTimeoutException,
 			HttpClientException, UnsupportedEncodingException {
 		// operation
-		service.request(new Link("0 required parameter", "http://www.redhat.com", HttpMethod.DELETE, null, null));
+		service.request(new Link("0 required parameter", "http://www.redhat.com", HttpMethod.DELETE, null, null), IHttpClient.NO_TIMEOUT);
 		// verifications
-		verify(clientMock, times(1)).delete(anyMapOf(String.class, Object.class), any(URL.class));
+		verify(clientMock, times(1)).delete(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT));
 	}
 
 	@Test
@@ -128,9 +129,9 @@ public class RestServiceTest {
 			MalformedURLException {
 		// operation
 		String url = "http://www.redhat.com";
-		service.request(new Link("0 required parameter", url, HttpMethod.GET, null, null));
+		service.request(new Link("0 required parameter", url, HttpMethod.GET, null, null), IHttpClient.NO_TIMEOUT);
 		// verifications
-		verify(clientMock, times(1)).get(new URL(url));
+		verify(clientMock, times(1)).get(new URL(url), IHttpClient.NO_TIMEOUT);
 
 	}
 
@@ -139,10 +140,10 @@ public class RestServiceTest {
 			MalformedURLException {
 		// operation
 		String url = "/adietisheim-redhat";
-		service.request(new Link("0 require parameter", url, HttpMethod.GET, null, null));
+		service.request(new Link("0 require parameter", url, HttpMethod.GET, null, null), IHttpClient.NO_TIMEOUT);
 		// verifications
 		String targetUrl = service.getServiceUrl() + url.substring(1, url.length());
-		verify(clientMock, times(1)).get(new URL(targetUrl));
+		verify(clientMock, times(1)).get(new URL(targetUrl), IHttpClient.NO_TIMEOUT);
 	}
 
 	@Test
@@ -150,10 +151,10 @@ public class RestServiceTest {
 			HttpClientException, MalformedURLException {
 		// operation
 		String url = "/broker/rest/adietisheim-redhat";
-		service.request(new Link("0 require parameter", url, HttpMethod.GET, null, null));
+		service.request(new Link("0 require parameter", url, HttpMethod.GET, null, null), IHttpClient.NO_TIMEOUT);
 		// verifications
 		String targetUrl = service.getPlatformUrl() + url;
-		verify(clientMock, times(1)).get(new URL(targetUrl));
+		verify(clientMock, times(1)).get(new URL(targetUrl), IHttpClient.NO_TIMEOUT);
 	}
 
 	@Test
@@ -161,9 +162,9 @@ public class RestServiceTest {
 		try {
 			// pre-conditions
 			NotFoundException e = new NotFoundException(Samples.GET_DOMAINS_FOOBAR_KO_NOTFOUND.getContentAsString());
-			when(clientMock.get(any(URL.class))).thenThrow(e);
+			when(clientMock.get(any(URL.class), eq(IHttpClient.NO_TIMEOUT))).thenThrow(e);
 			// operation
-			service.request(new Link("0 require parameter", "/broker/rest/adietisheim", HttpMethod.GET, null, null));
+			service.request(new Link("0 require parameter", "/broker/rest/adietisheim", HttpMethod.GET, null, null), IHttpClient.NO_TIMEOUT);
 			// verifications
 			fail("OpenShiftEndPointException expected, did not occurr");
 		} catch (OpenShiftEndpointException e) {
@@ -175,10 +176,10 @@ public class RestServiceTest {
 	public void shouldHaveMessageIfErrors() throws Throwable {
 		try {
 			// pre-conditions
-			when(clientMock.post(anyMapOf(String.class, Object.class), any(URL.class)))
+			when(clientMock.post(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT)))
 					.thenThrow(new HttpClientException(Samples.POST_FOOBAR_DOMAINS_KO_INUSE.getContentAsString()));
 			// operation
-			service.request(new Link("0 require parameter", "/broker/rest/domains", HttpMethod.POST, null, null));
+			service.request(new Link("0 require parameter", "/broker/rest/domains", HttpMethod.POST, null, null), IHttpClient.NO_TIMEOUT);
 			// verifications
 			fail("OpenShiftEndPointException expected, did not occurr");
 		} catch (OpenShiftEndpointException e) {
@@ -200,10 +201,10 @@ public class RestServiceTest {
 	public void shouldReportPlatformUrlInException() throws Throwable {
 		try {
 			// pre-conditions
-			when(clientMock.post(anyMapOf(String.class, Object.class), any(URL.class)))
+			when(clientMock.post(anyMapOf(String.class, Object.class), any(URL.class), eq(IHttpClient.NO_TIMEOUT)))
 					.thenThrow(new HttpClientException(Samples.POST_FOOBAR_DOMAINS_KO_INUSE.getContentAsString()));
 			// operation
-			service.request(new Link("0 require parameter", "/broker/rest/domains", HttpMethod.POST, null, null));
+			service.request(new Link("0 require parameter", "/broker/rest/domains", HttpMethod.POST, null, null), IHttpClient.NO_TIMEOUT);
 			// verifications
 			fail("OpenShiftEndPointException expected, did not occurr");
 		} catch (OpenShiftEndpointException e) {
